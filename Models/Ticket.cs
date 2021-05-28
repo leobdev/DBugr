@@ -52,10 +52,13 @@ namespace DBugr.Models
         [DisplayName("Ticket Developer")]
         public string DeveloperUserId { get; set; }
 
+        [DisplayName("Comments")]
+        public int Comments { get; set; }
+
         //Navigational properties
         public virtual Project Project { get; set; }
 
-        public virtual TicketType TycketType { get; set; }
+        public virtual TicketType TicketType { get; set; }
 
         public virtual TicketPriority TicketPriority { get; set; }
 

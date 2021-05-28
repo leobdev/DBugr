@@ -767,7 +767,7 @@ namespace DBugr.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DBugr.Models.TicketType", "TycketType")
+                    b.HasOne("DBugr.Models.TicketType", "TicketType")
                         .WithMany()
                         .HasForeignKey("TicketTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -783,7 +783,7 @@ namespace DBugr.Data.Migrations
 
                     b.Navigation("TicketStatus");
 
-                    b.Navigation("TycketType");
+                    b.Navigation("TicketType");
                 });
 
             modelBuilder.Entity("DBugr.Models.TicketAttachment", b =>

@@ -22,7 +22,14 @@ namespace DBugr.Controllers
         // GET: Tickets
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Ticket.Include(t => t.DeveloperUser).Include(t => t.OwnerUser).Include(t => t.Project).Include(t => t.TicketPriority).Include(t => t.TicketStatus).Include(t => t.TycketType);
+            var applicationDbContext = _context.Ticket
+                                        .Include(t => t.DeveloperUser)
+                                        .Include(t => t.OwnerUser)
+                                        .Include(t => t.Project)
+                                        .Include(t => t.TicketPriority)
+                                        .Include(t => t.TicketStatus)
+                                        .Include(t => t.TicketType);
+            
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -40,7 +47,7 @@ namespace DBugr.Controllers
                 .Include(t => t.Project)
                 .Include(t => t.TicketPriority)
                 .Include(t => t.TicketStatus)
-                .Include(t => t.TycketType)
+                .Include(t => t.TicketType)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (ticket == null)
             {
@@ -161,7 +168,7 @@ namespace DBugr.Controllers
                 .Include(t => t.Project)
                 .Include(t => t.TicketPriority)
                 .Include(t => t.TicketStatus)
-                .Include(t => t.TycketType)
+                .Include(t => t.TicketType)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (ticket == null)
             {

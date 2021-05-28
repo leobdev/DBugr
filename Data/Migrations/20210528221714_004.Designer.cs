@@ -10,8 +10,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DBugr.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20210525203551_001")]
-    partial class _001
+    [Migration("20210528221714_004")]
+    partial class _004
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -312,6 +312,9 @@ namespace DBugr.Data.Migrations
 
                     b.Property<DateTimeOffset?>("ArchivedDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Comments")
+                        .HasColumnType("integer");
 
                     b.Property<DateTimeOffset>("Created")
                         .HasColumnType("timestamp with time zone");

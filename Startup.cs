@@ -1,5 +1,7 @@
 using DBugr.Data;
 using DBugr.Models;
+using DBugr.Services;
+using DBugr.Services.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -29,15 +31,18 @@ namespace DBugr
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(
-                    Configuration.GetConnectionString("DefaultConnection")));
+              options.UseNpgsql(DataUtility.GetConnectionString(Configuration)));
+
             services.AddDatabaseDeveloperPageExceptionFilter();
 
             services.AddIdentity<BTUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultUI()
                 .AddDefaultTokenProviders();
-
+            services.AddScoped<IBTRolesService, BTRolesService>();
+            services.AddScoped<IBTCompanyInfoService, BTCompanyInfoService>();
+            services.AddScoped<IBTHistoryService, BTHistoryService>();
+            services.AddScoped<IBTProjectService, BTprojectService>();
 
             services.AddMvc();
         }

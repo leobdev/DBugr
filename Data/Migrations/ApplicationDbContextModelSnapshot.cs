@@ -311,6 +311,9 @@ namespace DBugr.Data.Migrations
                     b.Property<DateTimeOffset?>("ArchivedDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("Comments")
+                        .HasColumnType("integer");
+
                     b.Property<DateTimeOffset>("Created")
                         .HasColumnType("timestamp with time zone");
 
@@ -765,7 +768,7 @@ namespace DBugr.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DBugr.Models.TicketType", "TycketType")
+                    b.HasOne("DBugr.Models.TicketType", "TicketType")
                         .WithMany()
                         .HasForeignKey("TicketTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -781,7 +784,7 @@ namespace DBugr.Data.Migrations
 
                     b.Navigation("TicketStatus");
 
-                    b.Navigation("TycketType");
+                    b.Navigation("TicketType");
                 });
 
             modelBuilder.Entity("DBugr.Models.TicketAttachment", b =>
