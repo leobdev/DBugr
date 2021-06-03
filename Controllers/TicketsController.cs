@@ -22,15 +22,27 @@ namespace DBugr.Controllers
         // GET: Tickets
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Ticket
+            var applicationDbContext = await _context.Ticket
                                         .Include(t => t.DeveloperUser)
                                         .Include(t => t.OwnerUser)
                                         .Include(t => t.Project)
                                         .Include(t => t.TicketPriority)
                                         .Include(t => t.TicketStatus)
-                                        .Include(t => t.TicketType);
+                                        .Include(t => t.TicketType).ToListAsync();
             
-            return View(await applicationDbContext.ToListAsync());
+            return View(applicationDbContext);
+        }
+
+        public async Task<IActionResult> AllTickets()
+        {
+            var applicationDbContext = await _context.Ticket
+                                        .Include(t => t.DeveloperUser)
+                                        .Include(t => t.OwnerUser)
+                                        .Include(t => t.Project)
+                                        .Include(t => t.TicketPriority)
+                                        .Include(t => t.TicketStatus)
+                                        .Include(t => t.TicketType).ToListAsync();
+            return View(applicationDbContext);
         }
 
         // GET: Tickets/Details/5
@@ -152,6 +164,60 @@ namespace DBugr.Controllers
             ViewData["TicketStatusId"] = new SelectList(_context.Set<TicketStatus>(), "Id", "Id", ticket.TicketStatusId);
             ViewData["TicketTypeId"] = new SelectList(_context.Set<TicketType>(), "Id", "Id", ticket.TicketTypeId);
             return View(ticket);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> MyTickets(int id)
+        {
+            ProjectMembersViewModel model = new();
+
+            //get company Id
+            int companyId = User.Identity.GetCompanyId().Value;
+
+            Project project = (await _projectService.GetAllProjectsByCompany(companyId))
+                                        .FirstOrDefault(p => p.Id == id);
+
+            model.Project = project;
+            List<BTUser> developers = await _infoService.GetMembersInRoleAsync(Roles.Developer.ToString(), companyId);
+            List<BTUser> submitters = await _infoService.GetMembersInRoleAsync(Roles.Submitter.ToString(), companyId);
+
+            List<BTUser> users = developers.Concat(submitters).ToList();
+            List<BTUser> members = project?.Members.ToList();
+            model.Users = new MultiSelectList(users, "Id", "FullName", members);
+            return View(model);
+
+        }
+
+
+        //post assing users
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+
+        public async Task<IActionResult> AssignUsers(ProjectMembersViewModel model)
+        {
+            if (model.SelectedUsers != null)
+            {
+                List<string> memberIds = (await _projectService.GetMembersWithoutPMAsync(model.Project.Id))
+                                                                .Select(m => m.Id).ToList();
+                foreach (string id in memberIds)
+                {
+                    await _projectService.RemoveUserFromProjectAsync(id, model.Project.Id);
+                }
+
+                foreach (string id in model.SelectedUsers)
+                {
+                    await _projectService.AddUserToProjectAsync(id, model.Project.Id);
+                }
+
+                //goto project details
+                return RedirectToAction("Index", "Projects", new { id = model.Project.Id });
+
+            }
+            else
+            {
+                //send an error message back
+            }
+            return View(model);
         }
 
         // GET: Tickets/Delete/5

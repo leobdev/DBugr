@@ -13,15 +13,15 @@ using System.Threading.Tasks;
 
 namespace DBugr.Services
 {
-    public class BTprojectService : IBTProjectService
+    public class BTProjectService : IBTProjectService
     {
         private readonly ApplicationDbContext _context;
-        private readonly ILogger<BTprojectService> _logger;
+        private readonly ILogger<BTProjectService> _logger;
         private readonly IBTRolesService _rolesService;
         private readonly UserManager<BTUser> _userManager;
 
-        public BTprojectService (ApplicationDbContext context,
-                                 ILogger<BTprojectService> logger,
+        public BTProjectService (ApplicationDbContext context,
+                                 ILogger<BTProjectService> logger,
                                  IBTRolesService roleService,
                                  UserManager<BTUser> usermanager)
         {
@@ -137,10 +137,16 @@ namespace DBugr.Services
             return await _context.Project.Where(p => p.CompanyId == companyId && p.Archived == true).ToListAsync();
         }
 
-        //pending pseudo-code to type
-        public Task<List<BTUser>> GetMembersWithoutPMAsync(int projectId)
+        //pending pseudo-code to type bellow
+        public async Task<List<BTUser>> GetMembersWithoutPMAsync(int projectId)
         {
-            throw new NotImplementedException();
+            List<BTUser> developers = await DevelopersOnProjectAsync(projectId);
+            List<BTUser> submitters = await SubmittersOnProjectAsync(projectId);
+            List<BTUser> admins = await GetProjectMembersByRoleAsync(projectId, "Admin");
+
+            List<BTUser> teamMembers = developers.Concat(submitters).Concat(admins).ToList();
+
+            return teamMembers;
         }
 
         public async Task<BTUser> GetProjectManagerAsync(int projectId)

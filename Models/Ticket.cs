@@ -26,6 +26,9 @@ namespace DBugr.Models
         [DisplayName("Created")]
         public DateTimeOffset Created { get; set; }
 
+        [DisplayName("Has Been Archived")]
+        public bool Archived { get; set; }
+
         [DataType(DataType.Date)]
         [DisplayName("Updated")]
         public DateTimeOffset? ArchivedDate { get; set; }

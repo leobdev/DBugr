@@ -7,16 +7,24 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DBugr.Data;
 using DBugr.Models;
+using DBugr.Models.ViewModels;
+using DBugr.Services.Interfaces;
+using DBugr.Extensions;
+using DBugr.Models.Enums;
 
 namespace DBugr.Controllers
 {
     public class ProjectsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IBTProjectService _projectService;
+        private readonly IBTCompanyInfoService _infoService;
 
-        public ProjectsController(ApplicationDbContext context)
+        public ProjectsController(ApplicationDbContext context, IBTProjectService projectService, IBTCompanyInfoService infoService)
         {
             _context = context;
+            _projectService = projectService;
+            _infoService = infoService;
         }
 
         // GET: Projects
@@ -35,6 +43,7 @@ namespace DBugr.Controllers
             }
 
             var project = await _context.Project
+                .Include(p => p.Members)
                 .Include(p => p.Company)
                 .Include(p => p.ProjectPriority)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -128,6 +137,63 @@ namespace DBugr.Controllers
         }
 
         // GET: Projects/Delete/5
+        //[Authorize(UserRolesController = "Admin,ProjectManager")]
+        [HttpGet]
+        public async Task<IActionResult> AssignUsers(int id)
+        {
+            ProjectMembersViewModel model = new ();
+
+            //get company Id
+            int companyId = User.Identity.GetCompanyId().Value;
+
+            Project project = (await _projectService.GetAllProjectsByCompany(companyId))
+                                        .FirstOrDefault(p => p.Id == id);
+
+            model.Project = project;
+            List<BTUser> developers = await _infoService.GetMembersInRoleAsync(Roles.Developer.ToString(), companyId);
+            List<BTUser> submitters = await _infoService.GetMembersInRoleAsync(Roles.Submitter.ToString(), companyId);
+
+            List<BTUser> users = developers.Concat(submitters).ToList();
+            List<BTUser> members = project?.Members.ToList();
+            model.Users = new MultiSelectList(users, "Id", "FullName", members);
+            return View(model);
+
+        }
+
+
+        //post assing users
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+
+        public async Task<IActionResult> AssignUsers(ProjectMembersViewModel model)
+        {
+            if (model.SelectedUsers != null)
+            {
+                List<string> memberIds = (await _projectService.GetMembersWithoutPMAsync(model.Project.Id))
+                                                                .Select(m => m.Id).ToList();
+                foreach(string id in memberIds)
+                {
+                    await _projectService.RemoveUserFromProjectAsync(id, model.Project.Id);
+                }
+
+                foreach(string id in model.SelectedUsers)
+                {
+                    await _projectService.AddUserToProjectAsync(id, model.Project.Id);
+                }
+
+                //goto project details
+                return RedirectToAction("Index", "Projects", new { id = model.Project.Id });
+
+            }
+            else
+            {
+                //send an error message back
+            }
+            return View(model);
+        }
+
+
+
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
