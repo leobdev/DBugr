@@ -55,9 +55,6 @@ namespace DBugr.Models
         [DisplayName("Ticket Developer")]
         public string DeveloperUserId { get; set; }
 
-        [DisplayName("Comments")]
-        public int Comments { get; set; }
-
         //Navigational properties
         public virtual Project Project { get; set; }
 
@@ -72,7 +69,7 @@ namespace DBugr.Models
         public BTUser DeveloperUser { get; set; }
 
 
-        public virtual ICollection<TicketComment> MyProperty { get; set; } = new HashSet<TicketComment>();
+        public virtual ICollection<TicketComment> Comments { get; set; } = new HashSet<TicketComment>();
 
         public virtual ICollection<TicketAttachment> Attachments { get; set; } = new HashSet<TicketAttachment>();
 

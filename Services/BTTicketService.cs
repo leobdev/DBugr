@@ -59,23 +59,22 @@ namespace DBugr.Services
         {
             try
             {
-                List<Ticket> tickets = await _context.Project.Include(p => p.Company)
-                                                             .Where(p => p.CompanyId == companyId)
+                List<Ticket> tickets = await _context.Project.Where(p => p.CompanyId == companyId)
                                                              .SelectMany(p => p.Tickets)
-                                                             .Include(t => t.Attachments)
-                                                             .Include(t => t.Comments)
-                                                             .Include(t => t.History)
-                                                             .Include(t => t.DeveloperUser)
-                                                             .Include(t => t.OwnerUser)
-                                                             .Include(t => t.TicketPriority)
-                                                             .Include(t => t.TicketStatus)
-                                                             .Include(t => t.TicketType)
-                                                             .Include(t => t.Project)
+                                                                 .Include(t => t.Attachments)
+                                                                 .Include(t => t.Comments)
+                                                                 .Include(t => t.History)
+                                                                 .Include(t => t.DeveloperUser)
+                                                                 .Include(t => t.OwnerUser)
+                                                                 .Include(t => t.TicketPriority)
+                                                                 .Include(t => t.TicketStatus)
+                                                                 .Include(t => t.TicketType)
+                                                                 .Include(t => t.Project)
                                                              .ToListAsync();
                 return tickets;
             }
-            catch
-            {
+            catch 
+            {               
                 throw;
             }
         }

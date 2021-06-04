@@ -7,16 +7,23 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DBugr.Data;
 using DBugr.Models;
+using DBugr.Extensions;
+using Microsoft.AspNetCore.Identity;
+using DBugr.Services.Interfaces;
 
 namespace DBugr.Controllers
 {
     public class TicketsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<BTUser> _userManager;
+        private readonly IBTTicketService _ticketService;
 
-        public TicketsController(ApplicationDbContext context)
+        public TicketsController(ApplicationDbContext context, UserManager<BTUser> userManager, IBTTicketService ticketService)
         {
             _context = context;
+            _userManager = userManager;
+            _ticketService = ticketService;
         }
 
         // GET: Tickets
@@ -72,12 +79,12 @@ namespace DBugr.Controllers
         // GET: Tickets/Create
         public IActionResult Create()
         {
-            ViewData["DeveloperUserId"] = new SelectList(_context.Users, "Id", "Id");
-            ViewData["OwnerUserId"] = new SelectList(_context.Users, "Id", "Id");
-            ViewData["ProjectId"] = new SelectList(_context.Project, "Id", "Id");
-            ViewData["TicketPriorityId"] = new SelectList(_context.Set<TicketPriority>(), "Id", "Id");
-            ViewData["TicketStatusId"] = new SelectList(_context.Set<TicketStatus>(), "Id", "Id");
-            ViewData["TicketTypeId"] = new SelectList(_context.Set<TicketType>(), "Id", "Id");
+            ViewData["DeveloperUserId"] = new SelectList(_context.Users, "Id", "Name");
+            ViewData["OwnerUserId"] = new SelectList(_context.Users, "Id", "Name");
+            ViewData["ProjectId"] = new SelectList(_context.Project, "Id", "Name");
+            ViewData["TicketPriorityId"] = new SelectList(_context.Set<TicketPriority>(), "Id", "Name");
+            ViewData["TicketStatusId"] = new SelectList(_context.Set<TicketStatus>(), "Id", "Name");
+            ViewData["TicketTypeId"] = new SelectList(_context.Set<TicketType>(), "Id", "Name");
             return View();
         }
 
@@ -86,13 +93,23 @@ namespace DBugr.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Description,Created,ArchivedDate,Updated,ProjectId,TicketTypeId,TicketPriorityId,TicketStatusId,OwnerUserId,DeveloperUserId")] Ticket ticket)
+        public async Task<IActionResult> Create([Bind("Id,Title,Description,ProjectId,TicketTypeId,TicketPriorityId")] Ticket ticket)
         {
             if (ModelState.IsValid)
             {
+                ticket.Created = DateTimeOffset.Now;
+
+                string userId = _userManager.GetUserId(User);
+
+                ticket.OwnerUserId = userId;
+
+                ticket.TicketStatusId = (await _ticketService.LookupTicketStatusIdAsync("New")).Value;
+
+
+
                 _context.Add(ticket);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Details", "Projects", new { id = ticket.ProjectId});
             }
             ViewData["DeveloperUserId"] = new SelectList(_context.Users, "Id", "Id", ticket.DeveloperUserId);
             ViewData["OwnerUserId"] = new SelectList(_context.Users, "Id", "Id", ticket.OwnerUserId);
@@ -116,12 +133,12 @@ namespace DBugr.Controllers
             {
                 return NotFound();
             }
-            ViewData["DeveloperUserId"] = new SelectList(_context.Users, "Id", "Id", ticket.DeveloperUserId);
-            ViewData["OwnerUserId"] = new SelectList(_context.Users, "Id", "Id", ticket.OwnerUserId);
-            ViewData["ProjectId"] = new SelectList(_context.Project, "Id", "Id", ticket.ProjectId);
-            ViewData["TicketPriorityId"] = new SelectList(_context.Set<TicketPriority>(), "Id", "Id", ticket.TicketPriorityId);
-            ViewData["TicketStatusId"] = new SelectList(_context.Set<TicketStatus>(), "Id", "Id", ticket.TicketStatusId);
-            ViewData["TicketTypeId"] = new SelectList(_context.Set<TicketType>(), "Id", "Id", ticket.TicketTypeId);
+            ViewData["DeveloperUserId"] = new SelectList(_context.Users, "Id", "FullName", ticket.DeveloperUserId);
+            ViewData["OwnerUserId"] = new SelectList(_context.Users, "Id", "FullName", ticket.OwnerUserId);
+            ViewData["ProjectId"] = new SelectList(_context.Project, "Id", "Name", ticket.ProjectId);
+            ViewData["TicketPriorityId"] = new SelectList(_context.Set<TicketPriority>(), "Id", "Name", ticket.TicketPriorityId);
+            ViewData["TicketStatusId"] = new SelectList(_context.Set<TicketStatus>(), "Id", "Name", ticket.TicketStatusId);
+            ViewData["TicketTypeId"] = new SelectList(_context.Set<TicketType>(), "Id", "Name", ticket.TicketTypeId);
             return View(ticket);
         }
 
@@ -167,57 +184,24 @@ namespace DBugr.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> MyTickets(int id)
+        public async Task<IActionResult> MyTickets()
         {
-            ProjectMembersViewModel model = new();
-
             //get company Id
             int companyId = User.Identity.GetCompanyId().Value;
-
-            Project project = (await _projectService.GetAllProjectsByCompany(companyId))
-                                        .FirstOrDefault(p => p.Id == id);
-
-            model.Project = project;
-            List<BTUser> developers = await _infoService.GetMembersInRoleAsync(Roles.Developer.ToString(), companyId);
-            List<BTUser> submitters = await _infoService.GetMembersInRoleAsync(Roles.Submitter.ToString(), companyId);
-
-            List<BTUser> users = developers.Concat(submitters).ToList();
-            List<BTUser> members = project?.Members.ToList();
-            model.Users = new MultiSelectList(users, "Id", "FullName", members);
-            return View(model);
-
-        }
+            //get current user Id
+            string userId = (await _userManager.GetUserAsync(User)).Id;
 
 
-        //post assing users
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+            List<Ticket> tickets = (await _ticketService.GetAllTicketsByCompanyAsync(companyId));
 
-        public async Task<IActionResult> AssignUsers(ProjectMembersViewModel model)
-        {
-            if (model.SelectedUsers != null)
-            {
-                List<string> memberIds = (await _projectService.GetMembersWithoutPMAsync(model.Project.Id))
-                                                                .Select(m => m.Id).ToList();
-                foreach (string id in memberIds)
-                {
-                    await _projectService.RemoveUserFromProjectAsync(id, model.Project.Id);
-                }
+            List<Ticket> dev = tickets.Where(t => t.DeveloperUserId == userId).ToList();
+            List<Ticket> sub = tickets.Where(t => t.OwnerUserId == userId).ToList();
 
-                foreach (string id in model.SelectedUsers)
-                {
-                    await _projectService.AddUserToProjectAsync(id, model.Project.Id);
-                }
+            List<Ticket> myTickets = dev.Concat(sub).ToList();
 
-                //goto project details
-                return RedirectToAction("Index", "Projects", new { id = model.Project.Id });
+                                       
+            return View(myTickets);
 
-            }
-            else
-            {
-                //send an error message back
-            }
-            return View(model);
         }
 
         // GET: Tickets/Delete/5

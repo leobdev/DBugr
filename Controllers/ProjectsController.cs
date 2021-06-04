@@ -11,6 +11,7 @@ using DBugr.Models.ViewModels;
 using DBugr.Services.Interfaces;
 using DBugr.Extensions;
 using DBugr.Models.Enums;
+using Microsoft.AspNetCore.Identity;
 
 namespace DBugr.Controllers
 {
@@ -19,12 +20,14 @@ namespace DBugr.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IBTProjectService _projectService;
         private readonly IBTCompanyInfoService _infoService;
+        private readonly UserManager<BTUser> _userManager;
 
-        public ProjectsController(ApplicationDbContext context, IBTProjectService projectService, IBTCompanyInfoService infoService)
+        public ProjectsController(ApplicationDbContext context, IBTProjectService projectService, IBTCompanyInfoService infoService, UserManager<BTUser> userManager)
         {
             _context = context;
             _projectService = projectService;
             _infoService = infoService;
+            _userManager = userManager;
         }
 
         // GET: Projects
@@ -58,8 +61,8 @@ namespace DBugr.Controllers
         // GET: Projects/Create
         public IActionResult Create()
         {
-            ViewData["CompanyId"] = new SelectList(_context.Company, "Id", "Name");
-            ViewData["ProjectPriorityId"] = new SelectList(_context.Set<ProjectPriority>(), "Id", "Id");
+            
+            ViewData["ProjectPriorityId"] = new SelectList(_context.Set<ProjectPriority>(), "Id", "Name");
             return View();
         }
 
@@ -68,16 +71,22 @@ namespace DBugr.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,CompanyId,Name,Description,StartDate,EndDate,ProjectPriorityId,FileName,ImageFileData,ImageContentType,Archived")] Project project)
+        public async Task<IActionResult> Create([Bind("Id,Name,Description,StartDate,EndDate,ProjectPriorityId,FileName,ImageFileData,ImageContentType,Archived")] Project project)
         {
             if (ModelState.IsValid)
             {
+                
+
+                BTUser btUser = await _userManager.GetUserAsync(User);
+
+                int companyId = User.Identity.GetCompanyId().Value;
+
                 _context.Add(project);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             ViewData["CompanyId"] = new SelectList(_context.Company, "Id", "Name", project.CompanyId);
-            ViewData["ProjectPriorityId"] = new SelectList(_context.Set<ProjectPriority>(), "Id", "Id", project.ProjectPriorityId);
+            ViewData["ProjectPriorityId"] = new SelectList(_context.Set<ProjectPriority>(), "Id", "Name", project.ProjectPriorityId);
             return View(project);
         }
 
@@ -104,6 +113,7 @@ namespace DBugr.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        
         public async Task<IActionResult> Edit(int id, [Bind("Id,CompanyId,Name,Description,StartDate,EndDate,ProjectPriorityId,FileName,ImageFileData,ImageContentType,Archived")] Project project)
         {
             if (id != project.Id)
@@ -161,7 +171,7 @@ namespace DBugr.Controllers
         }
 
 
-        //post assing users
+        //POST: Assing Users
         [HttpPost]
         [ValidateAntiForgeryToken]
 
