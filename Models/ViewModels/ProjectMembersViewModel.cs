@@ -8,7 +8,7 @@ namespace DBugr.Models.ViewModels
 {
     public class ProjectMembersViewModel
     {
-        public Project Project { get; set; } = new();
+        public Project Projects { get; set; } = new();
 
         public MultiSelectList Users { get; set; } //populates list box
 

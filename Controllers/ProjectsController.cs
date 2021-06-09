@@ -146,8 +146,6 @@ namespace DBugr.Controllers
             return View(project);
         }
 
-        // GET: Projects/Delete/5
-        //[Authorize(UserRolesController = "Admin,ProjectManager")]
         [HttpGet]
         public async Task<IActionResult> AssignUsers(int id)
         {
@@ -159,7 +157,7 @@ namespace DBugr.Controllers
             Project project = (await _projectService.GetAllProjectsByCompany(companyId))
                                         .FirstOrDefault(p => p.Id == id);
 
-            model.Project = project;
+            model.Projects = project;
             List<BTUser> developers = await _infoService.GetMembersInRoleAsync(Roles.Developer.ToString(), companyId);
             List<BTUser> submitters = await _infoService.GetMembersInRoleAsync(Roles.Submitter.ToString(), companyId);
 
@@ -179,20 +177,20 @@ namespace DBugr.Controllers
         {
             if (model.SelectedUsers != null)
             {
-                List<string> memberIds = (await _projectService.GetMembersWithoutPMAsync(model.Project.Id))
+                List<string> memberIds = (await _projectService.GetMembersWithoutPMAsync(model.Projects.Id))
                                                                 .Select(m => m.Id).ToList();
                 foreach(string id in memberIds)
                 {
-                    await _projectService.RemoveUserFromProjectAsync(id, model.Project.Id);
+                    await _projectService.RemoveUserFromProjectAsync(id, model.Projects.Id);
                 }
 
                 foreach(string id in model.SelectedUsers)
                 {
-                    await _projectService.AddUserToProjectAsync(id, model.Project.Id);
+                    await _projectService.AddUserToProjectAsync(id, model.Projects.Id);
                 }
 
                 //goto project details
-                return RedirectToAction("Index", "Projects", new { id = model.Project.Id });
+                return RedirectToAction("Index", "Projects", new { id = model.Projects.Id });
 
             }
             else
@@ -202,6 +200,8 @@ namespace DBugr.Controllers
             return View(model);
         }
 
+        // GET: Projects/Delete/5
+        //[Authorize(UserRolesController = "Admin,ProjectManager")]
 
 
         public async Task<IActionResult> Delete(int? id)

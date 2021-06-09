@@ -24,7 +24,7 @@ namespace DBugr.Models
         public string NewValue { get; set; }
 
         [DisplayName("Date Modified")]
-        public DateTime Created { get; set; }
+        public DateTimeOffset Created { get; set; }
 
         [DisplayName("Team Member")]
         public string UserId { get; set; }

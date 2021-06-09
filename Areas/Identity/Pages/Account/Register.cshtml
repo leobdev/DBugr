@@ -1,6 +1,7 @@
 ﻿@page
 @model RegisterModel
 @{
+    Layout = "/Views/Shared/_LoginLayout.cshtml";
     ViewData["Title"] = "Register";
 }
 
@@ -71,6 +72,7 @@
         </section>
     </div>
 </div>
+
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
