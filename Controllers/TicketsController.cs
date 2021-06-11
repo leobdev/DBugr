@@ -24,8 +24,9 @@ namespace DBugr.Controllers
         private readonly IBTHistoryService _historyService;
         private readonly IBTCompanyInfoService _companyInfoService;
         private readonly IBTFileService _fileService;
+        private readonly IBTNotificationService _notificationService;
 
-        public TicketsController(ApplicationDbContext context, UserManager<BTUser> userManager, IBTTicketService ticketService, IBTProjectService projectService, IBTHistoryService historyService, IBTCompanyInfoService companyInfoService, IBTFileService fileService)
+        public TicketsController(ApplicationDbContext context, UserManager<BTUser> userManager, IBTTicketService ticketService, IBTProjectService projectService, IBTHistoryService historyService, IBTCompanyInfoService companyInfoService, IBTFileService fileService, IBTNotificationService notificationService)
         {
             _context = context;
             _userManager = userManager;
@@ -34,6 +35,7 @@ namespace DBugr.Controllers
             _historyService = historyService;
             _companyInfoService = companyInfoService;
             _fileService = fileService;
+            _notificationService = notificationService;
         }
 
         // GET: Tickets
@@ -109,17 +111,19 @@ namespace DBugr.Controllers
         {
             if (ModelState.IsValid)
             {
-                BTUser = await _userManager.GetUserAsync(User);
+                BTUser btUser = await _userManager.GetUserAsync(User);
 
                 ticket.Created = DateTimeOffset.Now;
 
-                string btUser = _userManager.GetUserId(User);
+                string userId = _userManager.GetUserId(User);
 
                 ticket.OwnerUserId = userId;
 
                 ticket.TicketStatusId = (await _ticketService.LookupTicketStatusIdAsync("New")).Value;
 
                 _context.Add(ticket);
+
+                await _context.SaveChangesAsync();
 
                 #region Add History
                 //Add history
@@ -144,9 +148,9 @@ namespace DBugr.Controllers
                 {
                     TicketId = ticket.Id,
                     Title = "New Ticket",
-                    Message = $"New Ticket: {ticket?.Title}, was created by {btUser.FullName}",
+                    Message = $"New Ticket: {ticket?.Title}, was created by {btUser?.FullName}",
                     SenderId = btUser?.Id,
-                    Recipient = projectManager?.Id
+                    RecipientId = projectManager?.Id
                 };
                 if(projectManager != null)
                 {
@@ -157,11 +161,11 @@ namespace DBugr.Controllers
                     //Admin notification
                     await _notificationService.AdminsNotificationAsync(notification, companyId);
                 }
-
-                
+                              
 
                 return RedirectToAction("Details", "Projects", new { id = ticket.ProjectId});
             }
+            #endregion  
             ViewData["DeveloperUserId"] = new SelectList(_context.Users, "Id", "Id", ticket.DeveloperUserId);
             ViewData["OwnerUserId"] = new SelectList(_context.Users, "Id", "Id", ticket.OwnerUserId);
             ViewData["ProjectId"] = new SelectList(_context.Project, "Id", "Id", ticket.ProjectId);
@@ -208,8 +212,9 @@ namespace DBugr.Controllers
             if (ModelState.IsValid)
             {
                 int companyId = User.Identity.GetCompanyId().Value;
-                BTUser bTUser = await _userManager.GetUserAsync(User);
+                BTUser btUser = await _userManager.GetUserAsync(User);
                 BTUser projectManager = await _projectService.GetProjectManagerAsync(ticket.ProjectId);
+                Notification notification;
 
                 Ticket oldTicket = await _context.Ticket
                                          .Include(t => t.TicketPriority)
@@ -218,9 +223,7 @@ namespace DBugr.Controllers
                                          .Include(t => t.Project)
                                          .Include(t => t.DeveloperUser)
                                          .AsNoTracking().FirstOrDefaultAsync(t => t.Id == ticket.Id);
-
-                
-
+                                
                 try
                 {
                     ticket.Updated = DateTimeOffset.Now;
@@ -229,13 +232,25 @@ namespace DBugr.Controllers
 
                     // create and save a notification
 
-                     notification = new()
-                     {
-                         TicketId = ticket.Id,
-                         Title = $"Ticket modified on project - {oldTicket.Project.Name}"
-                         Message = $"Ticker; "
-                     }
-                     
+                    notification = new()
+                    {
+                        TicketId = ticket.Id,
+                        Title = $"Ticket modified on project - {oldTicket.Project.Name}",
+                        Message = $"Ticker: [{ticket.Id}]: {ticket.Title} updated by {btUser?.FullName}",
+                        Created = DateTimeOffset.Now,
+                        SenderId = btUser?.Id,
+                        RecipientId = ticket.DeveloperUserId
+                    };
+
+                    if(projectManager != null)
+                    {
+                        await _notificationService.SaveNotificationAsync(notification);
+                        await _notificationService.EmailNotificationAsync(notification, "Noew Ticket Added");
+                    }
+                    else
+                    {
+                        await _notificationService.AdminsNotificationAsync(notification, companyId);
+                    }                     
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -257,7 +272,7 @@ namespace DBugr.Controllers
                                          .Include(t => t.DeveloperUser)
                                          .AsNoTracking().FirstOrDefaultAsync(t => t.Id == ticket.Id);
 
-                await _historyService.AddHistory(oldTicket, newTicket, bTUser.Id);
+                await _historyService.AddHistory(oldTicket, newTicket, btUser.Id);
 
 
                 return RedirectToAction(nameof(Index));
@@ -319,7 +334,7 @@ namespace DBugr.Controllers
             {
                 int companyId = User.Identity.GetCompanyId().Value;
 
-                BTUser bTUser = await _userManager.GetUserAsync(User);
+                BTUser btUser = await _userManager.GetUserAsync(User);
                 BTUser developer = (await _companyInfoService.GetAllMembersAsync(companyId)).FirstOrDefault(m => m.Id == viewModel.DeveloperId);
                 BTUser projectManager = await _projectService.GetProjectManagerAsync(viewModel.Ticket.ProjectId);
 
@@ -339,7 +354,7 @@ namespace DBugr.Controllers
                                                         .Include(t => t.DeveloperUser)
                                                         .AsNoTracking().FirstOrDefaultAsync(t => t.Id == viewModel.Ticket.Id);
 
-                await _historyService.AddHistory(oldTicket, newTicket, bTUser.Id);
+                await _historyService.AddHistory(oldTicket, newTicket, btUser.Id);
 
             }
             return RedirectToAction("Details", new { id = viewModel.Ticket.Id });

@@ -13,11 +13,15 @@ namespace DBugr.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IBTCompanyInfoService _companyInfoService;
+        private readonly GmailEmailService _emailSender;
 
-        public BTNotificationService(ApplicationDbContext context, IBTCompanyInfoService companyInfoService)
+        public BTNotificationService(ApplicationDbContext context, 
+                                    IBTCompanyInfoService companyInfoService,
+                                    GmailEmailService emailSender)
         {
             _context = context;
             _companyInfoService = companyInfoService;
+            _emailSender = emailSender;
         }
 
         public async Task AdminsNotificationAsync(Notification notification, int companyId)
@@ -48,6 +52,8 @@ namespace DBugr.Services
             //send email
             string btUserEmail = btUser.Email;
             string message = notification.Message;
+
+            await _emailSender.SendEmailAsync(btUserEmail, emailSubject, message);
 
             try
             {
@@ -88,12 +94,15 @@ namespace DBugr.Services
         {
             try
             {
-                foreach(BTUser bTUser in members)
+                foreach(BTUser btUser in members)
                 {
-                    notification.RecipientId = bTUser.Id;
+                    notification.RecipientId = btUser.Id;
 
                     //await SaveNotificationAsync(notification)
                     await EmailNotificationAsync(notification, notification.Title);
+
+                    //TODO: Refactor to check for btUser.PhoneNumberbefore sending. Current default is my phone 
+                    //await SMSNotificationsAsync("", notification);
                 }
             }
             catch
@@ -109,6 +118,11 @@ namespace DBugr.Services
                 await _context.AddAsync(notification);
                 await _context.SaveChangesAsync();
             }
+            catch
+            {
+                throw;
+            }
+
         }
 
         public Task SMSNotificationAsync(string phone, Notification notification)
