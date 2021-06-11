@@ -11,6 +11,7 @@ using DBugr.Extensions;
 using Microsoft.AspNetCore.Identity;
 using DBugr.Services.Interfaces;
 using DBugr.Models.ViewModels;
+using System.IO;
 
 namespace DBugr.Controllers
 {
@@ -22,8 +23,9 @@ namespace DBugr.Controllers
         private readonly IBTProjectService _projectService;
         private readonly IBTHistoryService _historyService;
         private readonly IBTCompanyInfoService _companyInfoService;
+        private readonly IBTFileService _fileService;
 
-        public TicketsController(ApplicationDbContext context, UserManager<BTUser> userManager, IBTTicketService ticketService, IBTProjectService projectService, IBTHistoryService historyService, IBTCompanyInfoService companyInfoService)
+        public TicketsController(ApplicationDbContext context, UserManager<BTUser> userManager, IBTTicketService ticketService, IBTProjectService projectService, IBTHistoryService historyService, IBTCompanyInfoService companyInfoService, IBTFileService fileService)
         {
             _context = context;
             _userManager = userManager;
@@ -31,6 +33,7 @@ namespace DBugr.Controllers
             _projectService = projectService;
             _historyService = historyService;
             _companyInfoService = companyInfoService;
+            _fileService = fileService;
         }
 
         // GET: Tickets
@@ -74,6 +77,8 @@ namespace DBugr.Controllers
                 .Include(t => t.TicketPriority)
                 .Include(t => t.TicketStatus)
                 .Include(t => t.TicketType)
+                .Include(t=>t.Comments)
+                .Include(t=>t.Attachments)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (ticket == null)
             {
@@ -104,18 +109,57 @@ namespace DBugr.Controllers
         {
             if (ModelState.IsValid)
             {
+                BTUser = await _userManager.GetUserAsync(User);
+
                 ticket.Created = DateTimeOffset.Now;
 
-                string userId = _userManager.GetUserId(User);
+                string btUser = _userManager.GetUserId(User);
 
                 ticket.OwnerUserId = userId;
 
                 ticket.TicketStatusId = (await _ticketService.LookupTicketStatusIdAsync("New")).Value;
 
-
-
                 _context.Add(ticket);
+
+                #region Add History
+                //Add history
+                Ticket newTicket = await _context.Ticket
+                    .Include(t => t.TicketPriority)
+                    .Include(t => t.TicketStatus)
+                    .Include(t => t.TicketType)
+                    .Include(t => t.Project)
+                    .Include(t => t.DeveloperUser)
+                    .AsNoTracking().FirstOrDefaultAsync(t => t.Id == ticket.Id);
+
+                await _historyService.AddHistory(null, newTicket, btUser.Id);
                 await _context.SaveChangesAsync();
+                #endregion
+
+                #region Notification
+                BTUser projectManager = await _projectService.GetProjectManagerAsync(ticket.ProjectId);
+
+                int companyId = User.Identity.GetCompanyId().Value;
+
+                Notification notification = new()
+                {
+                    TicketId = ticket.Id,
+                    Title = "New Ticket",
+                    Message = $"New Ticket: {ticket?.Title}, was created by {btUser.FullName}",
+                    SenderId = btUser?.Id,
+                    Recipient = projectManager?.Id
+                };
+                if(projectManager != null)
+                {
+                    await _notificationService.SaveNotificationAsync(notification);
+                }
+                else
+                {
+                    //Admin notification
+                    await _notificationService.AdminsNotificationAsync(notification, companyId);
+                }
+
+                
+
                 return RedirectToAction("Details", "Projects", new { id = ticket.ProjectId});
             }
             ViewData["DeveloperUserId"] = new SelectList(_context.Users, "Id", "Id", ticket.DeveloperUserId);
@@ -182,6 +226,16 @@ namespace DBugr.Controllers
                     ticket.Updated = DateTimeOffset.Now;
                     _context.Update(ticket);
                     await _context.SaveChangesAsync();
+
+                    // create and save a notification
+
+                     notification = new()
+                     {
+                         TicketId = ticket.Id,
+                         Title = $"Ticket modified on project - {oldTicket.Project.Name}"
+                         Message = $"Ticker; "
+                     }
+                     
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -289,6 +343,18 @@ namespace DBugr.Controllers
 
             }
             return RedirectToAction("Details", new { id = viewModel.Ticket.Id });
+        }
+
+
+        public IActionResult ShowFile(int id)
+        {
+            TicketAttachment ticketAttachment = _context.TicketAttachment.Find(id);
+            string fileName = ticketAttachment.FileName;
+            byte[] fileData = ticketAttachment.FileData;
+            string ext = Path.GetExtension(fileName).Replace(".", "");
+
+            Response.Headers.Add("Content-Disposition", $"inline; filename={fileName}");
+            return File(fileData, $"application/{ext}");
         }
 
         // GET: Tickets/Delete/5
