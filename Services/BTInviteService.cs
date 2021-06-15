@@ -14,10 +14,10 @@ namespace DBugr.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IBTProjectService _projectService;
-        private readonly GmailEmailService _emailService;
+        private readonly IEmailSender _emailService;
 
         public BTInviteService(ApplicationDbContext context, IBTProjectService projectService,
-                                  GmailEmailService emailService
+                                  IEmailSender emailService
                                   )
         {
             _context = context;
@@ -25,8 +25,9 @@ namespace DBugr.Services
             _emailService = emailService;
         }
 
-        public async Task<bool> AcceptInviteAsync(Guid? token, string userId)
+        public async Task<bool> AcceptInviteAsync(Guid? code, string userId)
         {
+
             Invite invite = await _context.Invite.FirstOrDefaultAsync(i => i.CompanyToken == code);
 
             if (invite == null)
@@ -44,6 +45,8 @@ namespace DBugr.Services
             }
             catch
             { throw; }
+
+
         }
 
         public async Task<bool> AnyInviteAsync(Guid token, string email)
@@ -54,9 +57,9 @@ namespace DBugr.Services
         public async Task<Invite> GetInviteAsync(Guid token, string email)
         {
             Invite invite = await _context.Invite.Include(i => i.Company)
-                                .Include(i => i.Project)
-                                .Include(i => i.Invitor)
-                                .FirstOrDefaultAsync(i => i.CompanyToken == token && i.InviteeEmail == email);
+                                               .Include(i => i.Project)
+                                               .Include(i => i.Invitor)
+                                               .FirstOrDefaultAsync(i => i.CompanyToken == token && i.InviteeEmail == email);
 
             return invite;
         }
@@ -64,14 +67,14 @@ namespace DBugr.Services
         public async Task<Invite> GetInviteAsync(int id)
         {
             Invite invite = await _context.Invite.Include(i => i.Company)
-                                .Include(i => i.Project)
-                                .Include(i => i.Invitor)
-                                .FirstOrDefaultAsync(i => i.Id == id);
+                                            .Include(i => i.Project)
+                                            .Include(i => i.Invitor)
+                                            .FirstOrDefaultAsync(i => i.Id == id);
 
             return invite;
         }
 
-        public async Task<bool> ValidateInviteCodeAsync(Guid? token)
+        public async Task<bool> ValidateInviteCodeAsync(Guid? code)
         {
             if (code == null)
             {
@@ -91,6 +94,7 @@ namespace DBugr.Services
             {
                 return false;
             }
+
         }
     }
 }

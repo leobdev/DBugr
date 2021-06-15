@@ -26,7 +26,11 @@ namespace DBugr.Controllers
         private readonly IBTFileService _fileService;
         private readonly IBTNotificationService _notificationService;
 
-        public TicketsController(ApplicationDbContext context, UserManager<BTUser> userManager, IBTTicketService ticketService, IBTProjectService projectService, IBTHistoryService historyService, IBTCompanyInfoService companyInfoService, IBTFileService fileService, IBTNotificationService notificationService)
+        public TicketsController(ApplicationDbContext context, 
+            UserManager<BTUser> userManager, IBTTicketService ticketService, 
+            IBTProjectService projectService, IBTHistoryService historyService, 
+            IBTCompanyInfoService companyInfoService, IBTFileService fileService,
+            IBTNotificationService notificationService)
         {
             _context = context;
             _userManager = userManager;

@@ -14,11 +14,11 @@ using System.Threading.Tasks;
 
 namespace DBugr.Controllers
 {
-    [Authorize(Roles="")]
+    [Authorize(Roles="Admin")]
     public class UserRolesController : Controller
     {
         private readonly ApplicationDbContext _context;
-        //private readonly UserManager<BTUser> _userManager;
+        private readonly UserManager<BTUser> _userManager;
         private readonly IBTRolesService _rolesService;
         
         public UserRolesController(ApplicationDbContext context,
@@ -31,9 +31,9 @@ namespace DBugr.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ManagerUserRoles()
+        public async Task<IActionResult> ManageUserRoles()
         {
-            List<ManageUserRolesViewModel> model = new();
+            List<ManageUserRolesViewModel> member = new();
 
             //ToDo: Company Users
             List<BTUser> users = _context.Users.ToList();
@@ -44,10 +44,10 @@ namespace DBugr.Controllers
                 vm.BTUser = user;
                 var selected = await _rolesService.ListUserRolesAsync(user);
                 vm.Roles = new MultiSelectList(_context.Roles, "Name", "Name", selected);
-                model.Add(vm);
+                member.Add(vm);
             }
 
-            return View();
+            return View(member);
 
         }
 
@@ -55,13 +55,18 @@ namespace DBugr.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ManageUserRoles(ManageUserRolesViewModel member)
         {
+            //var id = member.BTUser.Id;
+            var selected = member.SelectedRoles;
+            
             BTUser user = _context.Users.Find(member.BTUser.Id);
-
+            //Get user's current roles
             IEnumerable<string> roles = await _rolesService.ListUserRolesAsync(user);
-            //Homework - create new IBTRolesService method for this
-            //await _userManager.RemoveFromRolesAsync(user, roles);
+            //Remove teh current roles
+            bool result = await _rolesService.RemoveUserFromRolesAsync(user,roles);
+            if(!result) { throw new Exception("Didnt work"); }
+            
 
-            string userRole = member.SelectedRoles.FirstOrDefault();
+            string userRole = selected.FirstOrDefault();
 
             if(Enum.TryParse(userRole, out Roles roleValue))
             {

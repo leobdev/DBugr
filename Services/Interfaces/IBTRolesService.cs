@@ -16,8 +16,7 @@ namespace DBugr.Services.Interfaces
 
         public Task<bool> RemoveUserFromRoleAsync(BTUser user, string roles);
 
-        //public Task<bool> RemoveUserFromRoleAsync(BTUser user, IEnumerable<string> roles);
-
+        public Task<bool> RemoveUserFromRolesAsync(BTUser user, IEnumerable<string> roles);
 
         public Task<List<BTUser>> UsersNotInRoleAsync(string roleName, int companyId);
 

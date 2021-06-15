@@ -221,8 +221,12 @@ namespace DBugr.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        private bool InviteExists(int id)
+        {
+            return _context.Invite.Any(e => e.Id == id);
+        }
 
-
+        [HttpGet]
         public async Task<IActionResult> ProcessInvite(string token, string email)
         {
             if (token == null)
@@ -249,11 +253,6 @@ namespace DBugr.Controllers
         public IActionResult ProcessInvite(Invite invite)
         {
             return RedirectToPage("RegisterByInvite", new { invite });
-        }
-
-        private bool InviteExists(int id)
-        {
-            return _context.Invite.Any(e => e.Id == id);
         }
     }
 }

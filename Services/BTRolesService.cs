@@ -41,19 +41,27 @@ namespace DBugr.Services
             return await _roleManager.GetRoleNameAsync(role);
         }
 
-        public Task<bool> IsUserInRoleAsync(BTUser user, string roleName)
+        public async Task<bool> IsUserInRoleAsync(BTUser user, string roleName)
         {
-            throw new NotImplementedException();
+            bool result = await _userManager.IsInRoleAsync(user, roleName);
+            return result;
         }
 
-        public Task<IEnumerable<string>> ListUserRolesAsync(BTUser user)
+        public async Task<IEnumerable<string>> ListUserRolesAsync(BTUser user)
         {
-            throw new NotImplementedException();
+            IEnumerable<string> result = await _userManager.GetRolesAsync(user);
+            return result;
         }
 
-        public async Task<bool> RemoveUserFromRoleAsync(BTUser user, string roles)
+        public async Task<bool> RemoveUserFromRoleAsync(BTUser user, string role)
         {
-            bool result = (await _userManager.RemoveFromRoleAsync(user, roles)).Succeeded;
+            bool result = (await _userManager.RemoveFromRoleAsync(user, role)).Succeeded;
+            return result;
+        }
+
+        public async Task<bool> RemoveUserFromRolesAsync(BTUser user, IEnumerable<string> roles)
+        {
+            bool result = (await _userManager.RemoveFromRolesAsync(user, roles)).Succeeded;
             return result;
         }
 

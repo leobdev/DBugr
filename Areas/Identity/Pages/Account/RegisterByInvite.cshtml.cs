@@ -15,37 +15,47 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using System.Text;
+using System.Text.Encodings;
+using Microsoft.AspNetCore.WebUtilities;
+using DBugr.Services.Interfaces;
+using System.Text.Encodings.Web;
 
 namespace DBugr.Areas.Identity.Pages.Account
 {
     
-    public class RegisterModel : PageModel
+    public class RegisterByInviteModel : PageModel
     {
         private readonly SignInManager<BTUser> _signInManager;
-        private readonly ApplicationDbContext _context;
+        private readonly IBTProjectService _projectService;
         private readonly UserManager<BTUser> _userManager;
         private readonly ILogger<RegisterModel> _logger;
         private readonly GmailEmailService _emailSender;
+        private readonly IBTInviteService _inviteService;
 
-        public RegisterModel(ApplicationDbContext context,
-            UserManager<BTUser> userManager,
+        public RegisterByInviteModel(UserManager<BTUser> userManager,
             SignInManager<BTUser> signInManager,
             ILogger<RegisterModel> logger,
-            GmailEmailService emailSender)
+            GmailEmailService emailSender,
+            IBTInviteService inviteService,
+            IBTProjectService projectService)
         {
-            _context = context;
+           
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _inviteService = inviteService;
+            _projectService = projectService;
+
         }
 
         [BindProperty]
-        public InputModel Input { get; set; }
+        public InputModel Input { get; set; } = new InputModel();
 
-        public string ReturnUrl { get; set; }
+        //public string ReturnUrl { get; set; }
 
-        public IList<AuthenticationScheme> ExternalLogins { get; set; }
+        //public IList<AuthenticationScheme> ExternalLogins { get; set; }
 
         public class InputModel
         {
@@ -68,10 +78,16 @@ namespace DBugr.Areas.Identity.Pages.Account
 
             [Required]
             [Display(Name = "Company Name")]
-            public string CompanyName { get; set; }
+            public string Company { get; set; }
 
-            [Display(Name = "Company Description")]
-            public string CompanyDescription { get; set; }
+            [Required]
+            [Display(Name = "CompanyId")]
+            public int CompanyId { get; set; }
+
+            [Required]
+            [Display(Name = "ProjectId")]
+            public int ProjectId { get; set; }
+
 
             [Required]
             [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
@@ -85,48 +101,46 @@ namespace DBugr.Areas.Identity.Pages.Account
             public string ConfirmPassword { get; set; }
         }
 
-        public async Task OnGetAsync(string returnUrl = null)
+        public async Task OnGetAsync(int id)
         {
-            ReturnUrl = returnUrl;
-            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            //Use "id" to find the invite  
+            Invite invite = await _inviteService.GetInviteAsync(id);
+
+            //Load Inputmodel with Invite information according to inviteId
+            Input.Email = invite.InviteeEmail;
+            Input.FirstName = invite.InviteeFirstName;
+            Input.LastName = invite.InviteeLastName;
+            Input.Company = invite.Company.Name;
+            Input.CompanyId = invite.CompanyId;
+            Input.ProjectId = invite.ProjectId;
+
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl = returnUrl ?? Url.Content("~/");
-            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+
             if (ModelState.IsValid)
             {
 
-                BTUser user = new()
+                var user = new BTUser
                 {
                     FirstName = Input.FirstName,
                     LastName = Input.LastName,
                     UserName = Input.Email,
-                    Email = Input.Email
+                    Email = Input.Email,
+                    CompanyId = Input.CompanyId
                 };
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
                 {
+
+                    await _projectService.AddUserToProjectAsync(user.Id, Input.ProjectId);
+
                     _logger.LogInformation("User created a new account with password.");
 
                     // -- Add new registrant a role of "NewUser" -- //
-                    await _userManager.AddToRoleAsync(user, Roles.Admin.ToString());
-
-                    // -- Create company based on New User input -- //
-                    Company company = new()
-                    {
-                        Name = Input.CompanyName,
-                        Description = Input.CompanyDescription
-                    };
-                    _context.Add(company);
-                    await _context.SaveChangesAsync();
-
-                    // -- Update New User CompanyId-- //
-                    user.CompanyId = company.Id;
-                    _context.Update(user);
-                    await _context.SaveChangesAsync();
-
+                    await _userManager.AddToRoleAsync(user, Roles.Submitter.ToString());
 
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
@@ -146,7 +160,7 @@ namespace DBugr.Areas.Identity.Pages.Account
                     else
                     {
                         await _signInManager.SignInAsync(user, isPersistent: false);
-                        return LocalRedirect(returnUrl);
+                        return RedirectToAction("Create", "Tickets");
                     }
                 }
                 foreach (var error in result.Errors)
@@ -159,4 +173,6 @@ namespace DBugr.Areas.Identity.Pages.Account
             return Page();
         }
     }
+
 }
+

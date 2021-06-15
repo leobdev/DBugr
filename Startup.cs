@@ -49,7 +49,9 @@ namespace DBugr
             services.AddScoped<IBTTicketService, BTTicketService>();
             services.AddScoped<IBTFileService, BTFileService>();
             services.AddScoped<IEmailSender, GmailEmailService>();
-            
+            services.AddScoped<IBTInviteService, BTInviteService>();
+            services.AddScoped<IBTNotificationService, BTNotificationService>();
+
 
             services.AddMvc();
         }

@@ -1,6 +1,7 @@
 ﻿using DBugr.Data;
 using DBugr.Models;
 using DBugr.Services.Interfaces;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -13,11 +14,11 @@ namespace DBugr.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IBTCompanyInfoService _companyInfoService;
-        private readonly GmailEmailService _emailSender;
+        private readonly IEmailSender _emailSender;
 
         public BTNotificationService(ApplicationDbContext context, 
                                     IBTCompanyInfoService companyInfoService,
-                                    GmailEmailService emailSender)
+                                    IEmailSender emailSender)
         {
             _context = context;
             _companyInfoService = companyInfoService;
