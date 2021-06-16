@@ -59,7 +59,7 @@
                         </li>
                         <li>
                             <a asp-controller="Tickets" asp-action="MyTickets" data-active="true">My Tickets</a>
-                        </li>
+                        </li>                    
                     </ul>
                 </li>
                 <li class="menu">
@@ -78,9 +78,9 @@
     <h1>Index</h1>
 
     <p>
-        <a asp-action="Create">Create New</a>
+        <a asp-action="Create" class="btn btn-light-default">Create New</a>
     </p>
-    <h1>Developer Tickets</h1>
+    <h1>@btUser.FullName Tickets</h1>
     <table class="table">
         <thead>
             <tr>
@@ -123,46 +123,45 @@
         <tbody>
             @foreach (var item in Model.Where(t => t.DeveloperUserId == btUser.Id))
             {
-                <tr>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Title)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Description)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Created)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.ArchivedDate)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Updated)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Project.Name)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.TicketType.Name)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.TicketPriority.Name)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.TicketStatus.Name)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.OwnerUser.FullName)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.DeveloperUser.FullName)
-                    </td>
-                    <td>
-                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-                    </td>
-                </tr>
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Title)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Created)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ArchivedDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Updated)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Project.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TicketType.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TicketPriority.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TicketStatus.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.OwnerUser.FullName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.DeveloperUser.FullName)
+                </td>
+                <td class="col btn-group-vertical">
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-light">Edit</a>
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-light">Details</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-light">Delete</a>
+                </td>           </tr>
             }
         </tbody>
     </table>
@@ -211,46 +210,46 @@
             <tbody>
                 @foreach (var item in Model)
                 {
-                    <tr>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Title)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Description)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Created)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.ArchivedDate)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Updated)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Project.Name)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.TicketType.Name)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.TicketPriority.Name)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.TicketStatus.Name)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.OwnerUser.FullName)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.DeveloperUser.FullName)
-                        </td>
-                        <td>
-                            <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                            <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                            <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-                        </td>
-                    </tr>
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Title)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Description)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Created)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ArchivedDate)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Updated)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Project.Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.TicketType.Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.TicketPriority.Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.TicketStatus.Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.OwnerUser.FullName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.DeveloperUser.FullName)
+                    </td>
+                    <td class="col btn-group-vertical">
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-light">Edit</a>
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-light">Details</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-light">Delete</a>
+                    </td>
+                </tr>
                 }
             </tbody>
         </table>

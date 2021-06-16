@@ -311,23 +311,33 @@ namespace DBugr.Controllers
 
         }
 
+
+
         [HttpGet]
-        public async Task<IActionResult> AssingTicket(int? ticketId)
+        public async Task<IActionResult> AssignTicket(int? ticketId)
         {
-            if (!ticketId.HasValue)
+            try
             {
-                return NotFound();
+
+                if (!ticketId.HasValue)
+                {
+                    return NotFound();
+                }
+
+                AssignDeveloperViewModel model = new();
+                int companyId = User.Identity.GetCompanyId().Value;
+
+                model.Ticket = (await _ticketService.GetAllTicketsByCompanyAsync(companyId))
+                                                    .FirstOrDefault(t => t.Id == ticketId);
+                model.Developer = new SelectList(await _projectService.DevelopersOnProjectAsync(model.Ticket.ProjectId), "Id", "FullName");
+
+
+                return View(model);
             }
-
-            AssignDeveloperViewModel model = new();
-            int companyId = User.Identity.GetCompanyId().Value;
-
-            model.Ticket = (await _ticketService.GetAllTicketsByCompanyAsync(companyId))
-                                                .FirstOrDefault(t => t.Id == ticketId);
-            model.Developer = new SelectList(await _projectService.DevelopersOnProjectAsync(model.Ticket.ProjectId), "Id", "FullName");
-
-             
-            return View(model);
+            catch
+            {
+                throw;
+            }
         }
 
         [HttpPost]

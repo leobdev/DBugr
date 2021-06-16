@@ -30,12 +30,13 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"><polyline points="9 18 15 12 9 6"></polyline></svg>
                         </div>
                     </a>
+                
                     <ul class="collapse submenu list-unstyled show" id="app" data-parent="#accordionExample">
                         <li>
                             <a asp-controller="Projects" asp-action="Index"  data-active="true"> All Projects </a>
                         </li>
                         <li>
-                            <a asp-controller="Projects" asp-action="Index"> My Projects </a>
+                            <a asp-controller="Projects" asp-action="MyProjects"> My Projects </a>
                         </li>
                     </ul>
                 </li>
@@ -146,10 +147,10 @@
                         <td>
                             @Html.DisplayFor(modelItem => item.ProjectPriority.Name)
                         </td>
-                        <td>
-                            <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                            <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                            <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                        <td class="col btn-group-vertical">
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-light">Edit</a> 
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-light">Details</a> 
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-light">Delete</a>
                         </td>
                     </tr>
                 }
@@ -157,3 +158,6 @@
         </table>
     </div>
 </div>
+@section Scripts{ 
+<script src="~/js/PriorityBadge.js"></script>
+} 

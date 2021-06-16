@@ -5,7 +5,7 @@
 }
 
 <!--  BEGIN MAIN CONTAINER  -->
-<div class="main-container" id="container">
+<div class="main-container dataTables_wrapper dt-bootstrap4" id="container">
     <div class="overlay"></div>
     <div class="search-overlay"></div>
     <!--  BEGIN SIDEBAR  -->
@@ -21,15 +21,26 @@
                         </div>
                     </a>
                 </li>
-                <ul class="collapse submenu list-unstyled show" id="app" data-parent="#accordionExample">
-                    <li>
-                        <a asp-controller="Projects" asp-action="Index" > All Projects </a>
-                    </li>
-                    <li>
-                        <a asp-controller="Projects" asp-action="Index"> My Projects </a>
-                    </li>
-                </ul>
-                
+                <li class="menu">
+                    <a asp-controller="Projects" asp-action="Index" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
+                        <div class="">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-box"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                            <span>Projects</span>
+                        </div>
+                        <div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </div>
+                    </a>
+
+                    <ul class="collapse submenu list-unstyled show" id="app" data-parent="#accordionExample">
+                        <li>
+                            <a asp-controller="Projects" asp-action="Index"> All Projects </a>
+                        </li>
+                        <li>
+                            <a asp-controller="Projects" asp-action="MyProjects"> My Projects </a>
+                        </li>
+                    </ul>
+                </li>
                 <li class="menu">
                     <a asp-controller="Tickets" asp-action="Index" aria-expanded="false" data-toggle="collapse" class="dropdown-toggle">
                         <div class="">
@@ -66,90 +77,98 @@
         <p>
             <a asp-action="Create">Create New</a>
         </p>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>
-                        @Html.DisplayNameFor(model => model.Title)
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.Description)
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.Created)
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.ArchivedDate)
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.Updated)
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.Project)
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.TicketType)
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.TicketPriority)
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.TicketStatus)
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.OwnerUser)
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.DeveloperUser)
-                    </th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model)
-                {
+        <div>
+
+            <table class="table dataTable dtr-inline">
+                <thead>
                     <tr>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Title)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Description)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Created)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.ArchivedDate)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Updated)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Project.Name)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.TicketType.Name)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.TicketPriority.Name)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.TicketStatus.Name)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.OwnerUser.FullName)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.DeveloperUser.FullName)
-                        </td>
-                        <td>
-                            <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                            <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                            <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-                        </td>
+                        <th>
+                            @Html.DisplayNameFor(model => model.Title)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.Description)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.Created)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.ArchivedDate)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.Updated)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.Project)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.TicketType.Name)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.TicketPriority.Name)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.TicketStatus.Name)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.OwnerUser)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.DeveloperUser)
+                        </th>
+                        <th></th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Title)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Description)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Created)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.ArchivedDate)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Updated)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Project.Name)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.TicketType.Name)
+                            </td>
+                            <td>
+                                <span class="badge priorityBadge">
+                                @Html.DisplayFor(modelItem => item.TicketPriority.Name)
+                                </span>
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.TicketStatus.Name)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.OwnerUser.FullName)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.DeveloperUser.FullName)
+                            </td>
+                            <td class="col btn-group-vertical">
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-light">Edit</a>
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-light">Details</a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-light">Delete</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
-    </div>
+</div>
+@section Scripts{
+    <script src="~/js/PriorityBadge.js"></script>
+} 
