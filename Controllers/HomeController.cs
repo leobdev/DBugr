@@ -55,6 +55,59 @@ namespace DBugr.Controllers
             return View(model);
         }
 
+        [HttpPost]
+        public async Task<JsonResult> ProjectsBarChart()
+        {
+            int companyId = User.Identity.GetCompanyId().Value;
+
+            List<Project> projects = (await _projectService.GetAllProjectsByCompany(companyId)).OrderBy(p => p.Id).ToList();
+
+            List<SubData> BarsData = new();
+
+            BarChartViewModel chartData = new()
+            {
+                categories = projects.Select(p => p.Name).ToArray()
+
+            };
+
+
+            SubData DevData = new()
+            {
+                name = "Development"
+            };
+            SubData ClosedData = new() 
+            { 
+                name= "Closed"
+            };
+
+            //Get the Id of a ticket in the 'Development' status
+            int devStatus = (await _ticketService.LookupTicketStatusIdAsync("Development")).Value;
+            //Get the Id of a ticket in the 'Closed' status
+            int closedStatus = (await _ticketService.LookupTicketStatusIdAsync("Resolved")).Value;
+
+            //Initialize a list of int for the number of tickets in Development
+            List<int> devTickets = new();
+            //Initialize a list of int for the number of tickets in Development
+            List<int> closedTickets= new();
+
+            foreach (Project prj in projects)
+            {
+                devTickets.Add(prj.Tickets.Where(t=>t.TicketStatusId== devStatus).Count());
+                closedTickets.Add(prj.Tickets.Where(t => t.TicketStatusId == closedStatus).Count());
+            }
+
+            DevData.data = devTickets.ToArray();
+            ClosedData.data = closedTickets.ToArray();
+
+            BarsData.Add(DevData);
+            BarsData.Add(ClosedData);
+
+
+            chartData.bars = BarsData.ToArray();
+
+            return Json(chartData);
+        }
+
         public IActionResult Landing()
         {
             return View();
