@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -61,8 +62,7 @@ namespace DBugr.Controllers
             int companyId = User.Identity.GetCompanyId().Value;
 
             List<Project> projects = (await _projectService.GetAllProjectsByCompany(companyId)).OrderBy(p => p.Id).ToList();
-
-            List<SubData> BarsData = new();
+ 
 
             BarChartViewModel chartData = new()
             {
@@ -70,6 +70,7 @@ namespace DBugr.Controllers
 
             };
 
+            List<SubData> BarsData = new();
 
             SubData DevData = new()
             {
@@ -85,9 +86,9 @@ namespace DBugr.Controllers
             //Get the Id of a ticket in the 'Closed' status
             int closedStatus = (await _ticketService.LookupTicketStatusIdAsync("Resolved")).Value;
 
-            //Initialize a list of int for the number of tickets in Development
+            //Get the Id of a ticket in the 'Development' status
             List<int> devTickets = new();
-            //Initialize a list of int for the number of tickets in Development
+            //Initialize a list of int for the number of tickets  Resolved
             List<int> closedTickets= new();
 
             foreach (Project prj in projects)
@@ -107,6 +108,45 @@ namespace DBugr.Controllers
 
             return Json(chartData);
         }
+
+        [HttpPost]
+        public async Task<JsonResult> DonutMethod()
+        {
+            int companyId = User.Identity.GetCompanyId().Value;
+            Random rnd = new();
+
+            List<Project> projects = (await _projectService.GetAllProjectsByCompany(companyId)).OrderBy(p => p.Id).ToList();
+
+            DonutViewModel chartData = new();
+            chartData.labels = projects.Select(p => p.Name).ToArray();
+
+            List<DonutSubData> dsArray = new();
+            List<int> tickets = new();
+            List<string> colors = new();
+
+            foreach (Project prj in projects)
+            {
+                tickets.Add(prj.Tickets.Count());
+
+                // This code will randomly select a color for each element of the data 
+                Color randomColor = Color.FromArgb(rnd.Next(256), rnd.Next(256), rnd.Next(256));
+                string colorHex = string.Format("#{0:X6}", randomColor.ToArgb() & 0X00FFFFFF);
+
+                colors.Add(colorHex);
+            }
+
+            DonutSubData temp = new()
+            {
+                data = tickets.ToArray(),
+                backgroundColor = colors.ToArray()
+            };
+            dsArray.Add(temp);
+
+            chartData.datasets = dsArray.ToArray();
+
+            return Json(chartData);
+        }
+
 
         public IActionResult Landing()
         {

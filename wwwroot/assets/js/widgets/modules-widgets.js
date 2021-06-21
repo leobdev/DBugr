@@ -1035,7 +1035,7 @@ try {
       =================================
   */
   var chart = new ApexCharts(
-      document.querySelector("#chart-2"),
+      document.querySelector("#donutChart"),
       options
   );
   
