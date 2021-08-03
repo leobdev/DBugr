@@ -113,12 +113,15 @@ namespace DBugr.Controllers
         public async Task<JsonResult> DonutMethod()
         {
             int companyId = User.Identity.GetCompanyId().Value;
-            Random rnd = new();
+            
 
-            List<Project> projects = (await _projectService.GetAllProjectsByCompany(companyId)).OrderBy(p => p.Id).ToList();
+            List<Project> projects = await _projectService.GetAllProjectsByCompany(companyId);
 
             DonutViewModel chartData = new();
-            chartData.labels = projects.Select(p => p.Name).ToArray();
+            //chartData.labels = projects.Select(p => p.Name).ToArray();
+            chartData.labels = new string[] { "cc", "bb", "aa" };
+            chartData.series = new int[] { 33, 22, 11 };
+
 
             List<DonutSubData> dsArray = new();
             List<int> tickets = new();
@@ -127,12 +130,7 @@ namespace DBugr.Controllers
             foreach (Project prj in projects)
             {
                 tickets.Add(prj.Tickets.Count());
-
-                // This code will randomly select a color for each element of the data 
-                Color randomColor = Color.FromArgb(rnd.Next(256), rnd.Next(256), rnd.Next(256));
-                string colorHex = string.Format("#{0:X6}", randomColor.ToArgb() & 0X00FFFFFF);
-
-                colors.Add(colorHex);
+              
             }
 
             DonutSubData temp = new()

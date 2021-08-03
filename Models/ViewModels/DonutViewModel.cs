@@ -8,6 +8,7 @@ namespace DBugr.Models.ViewModels
     public class DonutViewModel
     {
         public string[] labels { get; set; }
+        public int[] series { get; set; }
         public DonutSubData[] datasets { get; set; }
 
     }

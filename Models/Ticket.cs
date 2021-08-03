@@ -30,11 +30,11 @@ namespace DBugr.Models
         public bool Archived { get; set; }
 
         [DataType(DataType.Date)]
-        [DisplayName("Updated")]
+        [DisplayName("Date Archived")]
         public DateTimeOffset? ArchivedDate { get; set; }
 
         [DataType(DataType.Date)]
-        [DisplayName("Date Archived")]
+        [DisplayName("Date Updated")]
         public DateTimeOffset? Updated { get; set; }
 
         [DisplayName("Project")]

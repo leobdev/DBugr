@@ -26,7 +26,7 @@ namespace DBugr.Controllers
                                    IBTRolesService rolesService)
         {
             _context = context;
-            //_userManager = userManager;
+            _userManager = userManager;
             _rolesService = rolesService;
         }
 
