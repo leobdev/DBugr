@@ -81,13 +81,12 @@
                             <table id="style-3" class="table style-3  table-hover">
                                 <thead>
                                     <tr>
-                                        <th class="text-center">Image</th>
                                         <th>@Html.DisplayNameFor(model => model.Name)</th>
                                         <th>@Html.DisplayNameFor(model => model.Description)</th>
                                         <th>@Html.DisplayNameFor(model => model.StartDate)</th>
                                         <th>@Html.DisplayNameFor(model => model.EndDate)</th>
                                         <th>@Html.DisplayNameFor(model => model.Company)</th>
-                                        <th class="text-center">@Html.DisplayNameFor(model => model.ProjectPriority)</th>
+                                        <th class="text-center">@Html.DisplayNameFor(model => model.ProjectPriority.Id)</th>
                                         <th class="text-center dt-no-sorting">Action</th>
                                     </tr>
                                 </thead>
@@ -95,11 +94,8 @@
                                     @foreach (var item in Model)
                                     {
                                         <tr>
-                                            <td class="text-center">
-                                                <span><img src="assets/img/90x90.jpg" class="profile-img" alt="avatar"></span>
-                                            </td>
                                             <td>@Html.DisplayFor(modelItem => item.Name)</td>
-                                            <td>@Html.DisplayFor(modelItem => item.Description)</td>
+                                            <td class="text-wrap">@Html.DisplayFor(modelItem => item.Description)</td>
                                             <td>@Html.DisplayFor(modelItem => item.StartDate)</td>
                                             <td>@Html.DisplayFor(modelItem => item.EndDate)</td>
                                             <td>@Html.DisplayFor(modelItem => item.Company.Name)</td>
