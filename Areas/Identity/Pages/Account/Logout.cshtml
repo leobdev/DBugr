@@ -5,27 +5,40 @@
 }
 
 <body>
-    <div class="container mt-5">
-        <div class="row mt-5 pt-5">
-            <div class="col mt-5 pt-5">
-                <h1>@ViewData["Title"]</h1>
-                @{
-                    if (User.Identity.IsAuthenticated)
-                    {
-                        <form class="form-inline mt-5" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post">
-                            <h5>Are you sure to log out?</h5>
-                            <br />
-                            <button type="submit" class="nav-link btn btn-link text-dark">Click here to Logout</button>
+    <div class="container  mt-5">
 
+
+        <h1>@ViewData["Title"]</h1>
+        @{
+            if (User.Identity.IsAuthenticated)
+            {
+                <div class="row mt-5">
+                    <div class="col-6 offset-2 align-self-center">
+
+                        <h2>Are you sure to log out?</h2>
+                    </div>
+                </div>
+                <br />
+                <div class="row">
+                    <div class="col-6 offset-3">
+
+                        <form class="form-inline " asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post">
+                            <div>
+                                <button type="submit" class="nav-link btn btn-success">Click here to Logout</button>
+                            </div>
                         </form>
-                        <br />
-                    }
-                    else
-                    {
-                        <p>You have successfully logged out of the application.</p>
-                    }
-                }
-            </div>
-        </div>
+                    </div>
+                </div>
+
+                <br />
+                <br />
+            }
+            else
+            {
+                <p>You have successfully logged out of the application.</p>
+            }
+        }
+
+
     </div>
 </body>
