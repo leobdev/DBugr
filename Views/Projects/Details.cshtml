@@ -4,80 +4,145 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
 
-<div>
-    <h4>Project</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.StartDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.StartDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.EndDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.EndDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FileName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FileName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ImageFileData)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ImageFileData)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ImageContentType)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ImageContentType)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Archived)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Archived)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Company)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Company.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ProjectPriority)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ProjectPriority.Id)
-        </dd>
-        Members:
-    </dl>
-        @foreach (BTUser member in Model.Members)
-            {
-            <p>@member.FullName</p>
-            }  
+<div id="content" class="main-content">
+    <div class="layout-px-spacing">
+
+        <div class="row layout-spacing">
+
+            <!-- Content -->
+
+            <div class="col-xl-8 col-lg-6 col-md-7 col-sm-12 layout-top-spacing">
+                <div class="bio layout-spacing ">
+                    <div class="widget-content widget-content-area">
+                        <h3 class="">Project Details</h3>
+                        <p>See the details for this specific project. To perform modifications, click on Edit. To delete, click on Delete. </p>
+                        <div class="bio-skill-box">
+
+                            <div class="row">
+
+                                <div class="col-12 col-xl-6 col-lg-12 mb-xl-5 mb-5 ">
+
+                                    <div class="d-flex b-skills">
+                                        <div>
+                                        </div>
+                                        <div class="">
+                                            <h5>Project Name</h5>
+                                            <p>@Html.DisplayFor(model => model.Name)</p>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="col-12 col-xl-6 col-lg-12 mb-xl-5 mb-5 ">
+
+                                    <div class="d-flex b-skills">
+                                        <div>
+                                        </div>
+                                        <div class="">
+                                            <h5>Description</h5>
+                                            <p>@Html.DisplayFor(model => model.Description).</p>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="col-12 col-xl-6 col-lg-12 mb-xl-0 mb-5 ">
+
+                                    <div class="d-flex b-skills">
+                                        <div>
+                                        </div>
+                                        <div class="">
+                                            <h5>Start Date</h5>
+                                            <p>@Html.DisplayFor(model => model.StartDate)</p>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="col-12 col-xl-6 col-lg-12 mb-xl-0 mb-0 ">
+
+                                    <div class="d-flex b-skills">
+                                        <div>
+                                        </div>
+                                        <div class="">
+                                            <h5>End Date</h5>
+                                            <p>@Html.DisplayFor(model => model.EndDate)</p>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col-12 col-xl-6 col-lg-12 mb-xl-0 mb-0 ">
+
+                                    <div class="d-flex b-skills">
+                                        <div>
+                                        </div>
+                                        <div class="">
+                                            <h5>Company Name</h5>
+                                            <p>@Html.DisplayFor(model => model.Company.Name)</p>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col-12 col-xl-6 col-lg-12 mb-xl-0 mb-0 ">
+
+                                    <div class="d-flex b-skills">
+                                        <div>
+                                        </div>
+                                        <div class="">
+                                            <h5>Project Priority</h5>
+                                            <p>@Html.DisplayFor(model => model.ProjectPriority.Name)</p>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col-12 col-xl-6 col-lg-12 mb-xl-0 mb-0 ">
+
+                                    <div class="d-flex b-skills">
+                                        <div>
+                                        </div>
+                                        <div class="">
+                                            <h5>Members</h5>
+                                            @foreach (BTUser member in Model.Members)
+                                            {
+                                                <p>@member.FullName</p>
+                                            }
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="d-sm-flex justify-content-between">
+                                    <div class="field-wrapper">
+                                        <a asp-action="Edit" asp-route-id="@Model.Id" type="submit" class="btn btn-success" value="">Edit</a>
+                                    </div>
+                                </div>
+                                <div class="d-sm-flex justify-content-between">
+                                    <div class="field-wrapper">
+                                        <a asp-action="Delete" asp-route-id="@Model.Id" type="submit" class="btn btn-success" value="">Delete</a>
+                                    </div>
+                                </div>
+                                <div class="d-sm-flex justify-content-between">
+                                    <div class="field-wrapper">
+                                        <a asp-action="Index" type="submit" class="btn btn-outline-success" value="">Go Back</a>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+    <div class="footer-wrapper">
+        <div class="footer-section f-section-1">
+            <p class="">Copyright © 2021 <a target="_blank" href="https://designreset.com">DesignReset</a>, All rights reserved.</p>
+        </div>
+        <div class="footer-section f-section-2">
+            <p class="">Coded with <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-heart"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></p>
+        </div>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
 </div>
